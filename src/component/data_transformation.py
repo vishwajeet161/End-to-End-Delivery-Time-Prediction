@@ -22,9 +22,11 @@ class Feature_Engineering(BaseEstimator, TransformerMixin):
 
     def distance_numpy(self, df, lat1, lon1, lat2, lon2):
         p = np.pi/180 
+        # a = 0.5 - np.cos((df[lat2]-df[lat1])*p)/2 + np.cos(df[lat1]*p) * np.cos(df[lat2]*p) * (1-np.cos((df[lon2]-df[lon1])*p))/2
         a = 0.5 - np.cos((df[lat2]-df[lat1])*p)/2 + np.cos(df[lat1]*p) * np.cos(df[lat2]*p) * (1-np.cos((df[lon2]-df[lon1])*p))/2
-        df['distance'] = 12734 * np.arccos(np.sort(a))
 
+        df['distance'] = 12734 * np.arccos(np.sort(a))
+        logging.info(f"Adding a new column dataset {df.columns} ")
     def transform_data(self, df):
         try:
             df.drop(['ID'], axis = 1, inplace = True)
@@ -40,12 +42,14 @@ class Feature_Engineering(BaseEstimator, TransformerMixin):
                                 'Order_Date', 'Time_Orderd', 'Time_Order_picked'], axis=1, inplace = True)
             
             logging.info("droping columns from our original dataset")
+            # logging.info(f"checking columns : {df.columns} ")
+
             return df
 
         except Exception as e:
             raise CustomException(e, sys)
         
-    def fit(self, y=None):
+    def fit(self, x, y=None):
         return self
         
     def transform(self, x:pd.DataFrame, y = None):
@@ -71,7 +75,7 @@ class DataTransformation:
     def get_data_transformation_obj(self):
         try:
             Road_traffic_density = ['Low', 'Medium', 'High', 'Jam']
-            Weather_conditions = ['Sunny', 'Cloudy', 'Fog', 'Sandstroms', 'Windy', 'Stromy']
+            Weather_conditions = ['Sunny', 'Cloudy', 'Fog', 'Sandstorms', 'Windy', 'Stormy']
 
             categorical_columns = ['Type_of_order', 'Type_of_vehicle', 'Festival', 'City']
             ordinal_encoder = ['Road_traffic_density', 'Weather_conditions']
@@ -93,7 +97,7 @@ class DataTransformation:
             # ordinal pipeline
             ordinal_pipeline = Pipeline(steps= [
                                           ('impute', SimpleImputer(strategy= 'most_frequent')),
-                                          ('ordinal', OrdinalEncoder(categories=['Road_traffic_density', 'Weather_conditions'])),
+                                          ('ordinal', OrdinalEncoder(categories=[['Low', 'Medium', 'High', 'Jam'], ['Sunny', 'Cloudy', 'Fog', 'Sandstorms', 'Windy', 'Stormy']])),
                                           ('scaler', StandardScaler(with_mean=False))
                                           ])
             
@@ -105,7 +109,6 @@ class DataTransformation:
             logging.info("Pipeline Steps Completed")
 
             return preprocessor
-
 
         except Exception as e:
             raise CustomException(e, sys)
@@ -132,25 +135,27 @@ class DataTransformation:
             test_df = fe_obj.transform(test_df)
 
             train_df.to_csv("train_data.csv")
-            test_df.to_csv("test_data_csv")
+            test_df.to_csv("test_data.csv")
 
 
             processing_obj = self.get_data_transformation_obj()
 
-            target_column_name = "Time_taken (min)"
+            target_column_name = 'Time_taken (min)'
 
             x_train = train_df.drop(columns = target_column_name, axis = 1)
             y_train = train_df[target_column_name]
 
             x_test = test_df.drop(columns = target_column_name, axis = 1)
-            y_test = test_df[target_column_name]
-
+            y_test = test_df[target_column_name]         
+            logging.info(f"checking columns near error : {x_train.columns} ")
             x_train = processing_obj.fit_transform(x_train)
             x_test = processing_obj.transform(x_test)
 
-            train_arr = np.c_(x_train, np.array(y_train))
+            # train_arr = np.c_(x_train, np.array(y_train))
+            # test_arr = np.c_(x_test, np.array(y_test))
+            train_arr = np.c_[x_train, np.array(y_train)]
+            test_arr = np.c_[x_test, np.array(y_test)]
 
-            test_arr = np.c_(x_test, np.array(y_test))
 
             df_train = pd.DataFrame(train_arr)
             df_test = pd.DataFrame(test_arr)
@@ -167,7 +172,9 @@ class DataTransformation:
             save_obj(file_path=self.data_transformation_config.feature_engg_obj_path,
                      obj = fe_obj)
             
-            return(train_arr, test_arr, self.data_transformation_config.processed_obj_file_path)
+            return(train_arr, 
+                   test_arr, 
+                   self.data_transformation_config.processed_obj_file_path)
 
         except Exception as e:
             raise CustomException(e, sys)

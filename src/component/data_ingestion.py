@@ -9,10 +9,11 @@ from src.logger import logging
 from src.exception import CustomException
 from data_transformation import DataTransformation, DataTransformationConfig
 
+@dataclass
 class DataIngestionConfig:
-    train_data_path = TRAIN_FILE_PATH
-    test_data_path = TEST_FILE_PATH
-    raw_data_path = RAW_FILE_PATH
+    train_data_path:str = TRAIN_FILE_PATH
+    test_data_path:str = TEST_FILE_PATH
+    raw_data_path:str = RAW_FILE_PATH
 
 class DataIngestion:
     def __init__(self):
@@ -46,7 +47,7 @@ class DataIngestion:
 
 if __name__=="__main__":
     obj = DataIngestion()
-    train_data, test_data = obj.initiate_data_ingestion()
+    train_data_path, test_data_path = obj.initiate_data_ingestion()
 
     data_transformation = DataTransformation()
-    train_arr, test_arr = data_transformation.inititate_data_transformation(train_data, test_data)
+    train_arr, test_arr, processed_obj_file_path = data_transformation.inititate_data_transformation(train_data_path, test_data_path)
