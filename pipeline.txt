@@ -2,3 +2,10 @@ constant file -> configuration file -> data ingestion
 
 # Data Transformation
 constant file -> configuration file -> data transformation ->(if required) utils file -> data transformation
+
+# Model Training 
+
+1. constant -> Done 
+2. configuration -> Done 
+3. Model Training
+4. utils file (helper function)
