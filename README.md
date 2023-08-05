@@ -1,7 +1,7 @@
 # New-End-to-End-ML-Project
 
 1. Create new Environment
---> virtualenv env
+--> virtualenv myenv
 
 2. Activate your environment
 --> source myenv/bin/activate (for linux)
