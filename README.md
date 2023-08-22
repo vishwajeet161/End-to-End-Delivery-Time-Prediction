@@ -9,3 +9,8 @@
 
 2. Install your requirement file
 --> pip install -r requirement.txt
+
+3. To run the application
+--> python app.py
+
+Go to the browser and search <localhost:8888>
