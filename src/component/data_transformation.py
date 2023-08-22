@@ -22,14 +22,13 @@ class Feature_Engineering(BaseEstimator, TransformerMixin):
 
     def distance_numpy(self, df, lat1, lon1, lat2, lon2):
         p = np.pi/180 
-        # a = 0.5 - np.cos((df[lat2]-df[lat1])*p)/2 + np.cos(df[lat1]*p) * np.cos(df[lat2]*p) * (1-np.cos((df[lon2]-df[lon1])*p))/2
         a = 0.5 - np.cos((df[lat2]-df[lat1])*p)/2 + np.cos(df[lat1]*p) * np.cos(df[lat2]*p) * (1-np.cos((df[lon2]-df[lon1])*p))/2
 
-        df['distance'] = 12734 * np.arccos(np.sort(a))
+        df['distance'] = 12742 * np.arcsin(np.sqrt(a))
         logging.info(f"Adding a new column dataset {df.columns} ")
     def transform_data(self, df):
         try:
-            df.drop(['ID'], axis = 1, inplace = True)
+            df.drop(['ID'], axis = 1, inplace = True, errors='ignore')
 
             self.distance_numpy(df, 'Restaurant_latitude',
                                 'Restaurant_longitude',
@@ -39,7 +38,7 @@ class Feature_Engineering(BaseEstimator, TransformerMixin):
             df.drop(['Delivery_person_ID', 'Restaurant_latitude', 'Restaurant_longitude',
                                 'Delivery_location_latitude',
                                 'Delivery_location_longitude',
-                                'Order_Date', 'Time_Orderd', 'Time_Order_picked'], axis=1, inplace = True)
+                                'Order_Date', 'Time_Orderd', 'Time_Order_picked'], axis=1, inplace = True, errors='ignore')
             
             logging.info("droping columns from our original dataset")
             # logging.info(f"checking columns : {df.columns} ")

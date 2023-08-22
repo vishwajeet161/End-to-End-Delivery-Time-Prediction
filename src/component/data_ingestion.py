@@ -7,7 +7,7 @@ from sklearn.model_selection import train_test_split
 from dataclasses import dataclass
 from src.logger import logging
 from src.exception import CustomException
-from data_transformation import DataTransformation, DataTransformationConfig
+from src.component.data_transformation import DataTransformation, DataTransformationConfig
 from src.component.model_trainer import ModelTrainer
 
 @dataclass
@@ -32,10 +32,10 @@ class DataIngestion:
             train_set, test_set = train_test_split(df, test_size=.20, random_state=42)
 
             os.makedirs(os.path.dirname(self.data_ingestion_config.train_data_path), exist_ok=True)
-            train_set.to_csv(self.data_ingestion_config.train_data_path, header = True)
+            train_set.to_csv(self.data_ingestion_config.train_data_path,index = False, header = True)
 
             os.makedirs(os.path.dirname(self.data_ingestion_config.test_data_path), exist_ok=True)
-            test_set.to_csv(self.data_ingestion_config.test_data_path, header = True)
+            test_set.to_csv(self.data_ingestion_config.test_data_path,index=False, header = True)
 
             return(
                 self.data_ingestion_config.train_data_path,
@@ -62,6 +62,6 @@ if __name__=="__main__":
     train_data_path, test_data_path = obj.initiate_data_ingestion()
 
     data_transformation = DataTransformation()
-    train_arr, test_arr, processed_obj_file_path = data_transformation.inititate_data_transformation(train_data_path, test_data_path)
+    train_arr, test_arr,_ = data_transformation.inititate_data_transformation(train_data_path, test_data_path)
     model_trainer = ModelTrainer()
     print(model_trainer.inititate_model_training(train_arr, test_arr))
